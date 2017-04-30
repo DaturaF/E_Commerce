@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 #coding=utf-8
 
+"""
+电子商务系统商家客户端主界面
+by: xf
+2017.4.29
+"""
 # Form implementation generated from reading ui file 'C:\Users\Administrator\Desktop\p1.ui'
 #
 # Created: Fri Apr 21 10:21:55 2017
@@ -11,6 +16,8 @@
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
+from dingdan import *
+from xiugai import *
 from db import *
 import sys
 reload(sys)
@@ -39,7 +46,7 @@ class P1(object):
         Dialog.setObjectName(_fromUtf8("Dialog"))
         Dialog.resize(833, 386)
         self.form = Dialog
-        self.num_flag = 0 # 表格的行数记录
+        self.num_flag = 0  # 表格的行数记录
         self.label = QtGui.QLabel(Dialog)
         self.label.setGeometry(QtCore.QRect(30, 40, 72, 15))
         self.label.setObjectName(_fromUtf8("label"))
@@ -66,7 +73,7 @@ class P1(object):
             headItem = self.tableWidget.horizontalHeaderItem(x)  # 获得水平方向表头的Item对象
             headItem.setBackgroundColor(QColor(0, 60, 10))  # 设置单元格背景颜色
             headItem.setTextColor(QColor(200, 111, 30))  # 设置文字颜色
-        self.tableWidget.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+        self.tableWidget.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)  # 无法编辑
         # 初始化表格
         self.set_table()
 
@@ -87,13 +94,16 @@ class P1(object):
 
     def retranslateUi(self, Dialog):
         Dialog.setWindowTitle(_translate("Dialog", "电子商务系统", None))
+        pe = QPalette()
+        pe.setColor(QPalette.WindowText, Qt.blue)
+        self.label.setPalette(pe)
         self.label.setText(_translate("Dialog", "新订单", None))
         self.pushButton.setText(_translate("Dialog", "完成订单", None))
         self.pushButton_2.setText(_translate("Dialog", "取消订单", None))
         self.pushButton_3.setText(_translate("Dialog", "查看全部订单", None))
         self.pushButton_4.setText(_translate("Dialog", "修改商品信息", None))
 
-    def set_table(self):
+    def set_table(self):  # 表单设置
         print 'set table'
         db = DataBase()
         db.get_connect()
@@ -101,6 +111,7 @@ class P1(object):
         sql = 'select confirm_time, phone, address, client_order, total_price from user_order where status =\'0\';'
         result = db.execute(sql)
         self.num_flag = len(result)-1
+        print 'num', self.num_flag
         while self.tableWidget.rowCount() < self.num_flag+1:
             self.tableWidget.insertRow(1)
         for i in range(len(result)):
@@ -110,8 +121,7 @@ class P1(object):
                 self.tableWidget.setItem(i, j, newItem)
         db.db_close()
 
-
-    def finish_order(self):
+    def finish_order(self):  # 完成订单
         num = self.tableWidget.currentRow()
         o_time = self.tableWidget.item(num, 0).text()
         o_phone = self.tableWidget.item(num, 1).text()
@@ -126,7 +136,8 @@ class P1(object):
         db.execute(sql)
         db.db_commit()
         db.db_close()
-    def cancel_order(self):
+
+    def cancel_order(self):  # 取消订单
         num = self.tableWidget.currentRow()
         o_time = self.tableWidget.item(num, 0).text()
         o_phone = self.tableWidget.item(num, 1).text()
@@ -141,7 +152,7 @@ class P1(object):
         db.db_commit()
         db.db_close()
 
-    def db_detective(self):
+    def db_detective(self):  # 数据库数据实时监测线程
         print 'thread start'
         db = DataBase()
         db.get_connect()
@@ -172,10 +183,22 @@ class P1(object):
             db.db_close()
             time.sleep(1)
 
+    def all_order(self):  # 查看订单
+        self.form.hide()
+        Form1 = QtGui.QDialog()
+        ui = Ui_dingdan()
+        ui.setupUi(Form1)
+        Form1.show()
+        Form1.exec_()
+        self.form.show()
 
-    def all_order(self):
-        pass
     def change_message(self):
-        pass
+        self.form.hide()
+        Form1 = QtGui.QDialog()
+        ui = Ui_xiugai()
+        ui.setupUi(Form1)
+        Form1.show()
+        Form1.exec_()
+        self.form.show()
 
 
